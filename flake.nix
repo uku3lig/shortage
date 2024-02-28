@@ -24,7 +24,7 @@
               nodePackages.pnpm
             ];
 
-            packages = [nil nrr];
+            packages = [nil nrr xh];
           };
 
         formatter = pkgs.alejandra;
