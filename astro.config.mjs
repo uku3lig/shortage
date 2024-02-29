@@ -14,6 +14,9 @@ export default defineConfig({
         SHORTAGE_NAMESPACE: {
           type: "kv",
         },
+        SHORTAGE_AUTH: {
+          type: "d1",
+        },
       },
     },
   }),

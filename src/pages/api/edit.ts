@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+
 import { destr } from "destr";
 import { z } from "zod";
 
@@ -10,6 +11,11 @@ const EditSchema = z.object({
 });
 
 export const PATCH: APIRoute = async ({ request, locals }) => {
+  const user = locals.user;
+  if (!user) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
   const body = await request.text();
   const result = EditSchema.safeParse(destr(body));
 
@@ -23,11 +29,12 @@ export const PATCH: APIRoute = async ({ request, locals }) => {
   const { name, ...data } = result.data;
 
   const shortened = await kv.get(name);
-  if (!shortened) {
+  const parsed: ShortenedUrl = destr(shortened);
+
+  if (!parsed || parsed.owner != user.githubId) {
     return new Response("Not found", { status: 404 });
   }
 
-  const parsed: ShortenedUrl = destr(shortened);
   const updated = { ...parsed, ...data };
   await kv.put(name, JSON.stringify(updated));
 

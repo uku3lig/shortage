@@ -1,5 +1,5 @@
 ---
-export const prerender = true;
+const user = Astro.locals.user;
 ---
 
 <html lang="en">
@@ -12,5 +12,23 @@ export const prerender = true;
   </head>
   <body>
     <h1>Astro</h1>
+    <p>Hello {user?.username}</p>
+    <button id="register">Click me</button>
+    <a href="/login">Login</a>
+    <a href="/logout">Logout</a>
   </body>
 </html>
+
+<script>
+  document.getElementById("register")?.addEventListener("click", handleClick);
+
+  async function handleClick() {
+    const res = await fetch("/api/register", {
+      method: "POST",
+      body: JSON.stringify({ target: "https://google.com" }),
+    });
+
+    const text = await res.text();
+    console.log(text);
+  }
+</script>

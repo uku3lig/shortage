@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+
 import { destr } from "destr";
 import { nanoid } from "nanoid";
 import { z } from "zod";
@@ -11,6 +12,11 @@ const RegisterSchema = z.object({
 });
 
 export const POST: APIRoute = async ({ request, locals }) => {
+  const user = locals.user;
+  if (!user) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
   const body = await request.text();
   const result = RegisterSchema.safeParse(destr(body));
 
@@ -28,7 +34,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return new Response("Name already taken", { status: 409 });
   }
 
-  const shortened = { ...data, uses: 0, owner: 0 };
+  const shortened = { ...data, uses: 0, owner: user.githubId };
   await kv.put(short, JSON.stringify(shortened));
 
   return new Response(short);
