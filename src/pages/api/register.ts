@@ -8,7 +8,7 @@ const RegisterSchema = z.object({
   target: z.string(),
   name: z.string().optional(),
   expiration: z.string().datetime().optional(),
-  max_uses: z.number().int().positive().safe().optional(),
+  max_uses: z.coerce.number().int().positive().safe().optional(),
 });
 
 export const POST: APIRoute = async ({ request, locals }) => {

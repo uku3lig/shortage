@@ -1,34 +1,10 @@
 ---
+import PageLayout from "../layouts/PageLayout.astro";
+import UserDashboard from "../components/UserDashboard.vue";
+
 const user = Astro.locals.user;
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
-    <title>Astro</title>
-  </head>
-  <body>
-    <h1>Astro</h1>
-    <p>Hello {user?.username}</p>
-    <button id="register">Click me</button>
-    <a href="/login">Login</a>
-    <a href="/logout">Logout</a>
-  </body>
-</html>
-
-<script>
-  document.getElementById("register")?.addEventListener("click", handleClick);
-
-  async function handleClick() {
-    const res = await fetch("/api/register", {
-      method: "POST",
-      body: JSON.stringify({ target: "https://google.com" }),
-    });
-
-    const text = await res.text();
-    console.log(text);
-  }
-</script>
+<PageLayout title="Astro">
+  {user ? <UserDashboard {user} client:load /> : <a href="/login">Login</a>}
+</PageLayout>
