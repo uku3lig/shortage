@@ -22,16 +22,21 @@ export const DELETE: APIRoute = async ({ request, locals }) => {
     });
   }
 
-  const kv = locals.runtime.env.SHORTAGE_NAMESPACE;
+  const db = locals.runtime.env.SHORTAGE_AUTH;
 
-  const shortened = await kv.get(result.data.name);
-  const parsed: ShortenedUrl = destr(shortened);
+  const shortened = await db
+    .prepare("SELECT * FROM urls WHERE short = ?")
+    .bind(result.data.name)
+    .first<ShortenedUrl>();
 
-  if (!parsed || parsed.owner != user.githubId) {
+  if (!shortened || shortened.owner != user.githubId) {
     return new Response("Not found", { status: 404 });
   }
 
-  await kv.delete(result.data.name);
+  await db
+    .prepare("DELETE FROM urls WHERE short = ?")
+    .bind(result.data.name)
+    .run();
 
   return new Response(null, { status: 204 });
 };

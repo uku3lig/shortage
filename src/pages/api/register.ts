@@ -26,16 +26,33 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
   }
 
-  const kv = locals.runtime.env.SHORTAGE_NAMESPACE;
+  const db = locals.runtime.env.SHORTAGE_AUTH;
   const { name, ...data } = result.data;
   const short = name || nanoid(8);
 
-  if (await kv.get(short)) {
+  const existing = await db
+    .prepare("SELECT * FROM urls WHERE short = ?")
+    .bind(short)
+    .first<ShortenedUrl>();
+
+  if (existing) {
     return new Response("Name already taken", { status: 409 });
   }
 
   const shortened = { ...data, uses: 0, owner: user.githubId };
-  await kv.put(short, JSON.stringify(shortened));
+  await db
+    .prepare(
+      "INSERT INTO urls (short, target, expiration, max_uses, uses, owner) VALUES (?, ?, ?, ?, ?, ?)",
+    )
+    .bind(
+      short,
+      shortened.target,
+      shortened.expiration ? shortened.expiration : null,
+      shortened.max_uses ? shortened.max_uses : null,
+      shortened.uses,
+      shortened.owner,
+    )
+    .run();
 
   return new Response(short);
 };

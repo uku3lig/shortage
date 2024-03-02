@@ -11,9 +11,6 @@ export default defineConfig({
       mode: "local",
       type: "pages",
       bindings: {
-        SHORTAGE_NAMESPACE: {
-          type: "kv",
-        },
         SHORTAGE_AUTH: {
           type: "d1",
         },

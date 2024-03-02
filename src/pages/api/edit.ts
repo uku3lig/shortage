@@ -25,18 +25,25 @@ export const PATCH: APIRoute = async ({ request, locals }) => {
     });
   }
 
-  const kv = locals.runtime.env.SHORTAGE_NAMESPACE;
+  const db = locals.runtime.env.SHORTAGE_AUTH;
   const { name, ...data } = result.data;
 
-  const shortened = await kv.get(name);
-  const parsed: ShortenedUrl = destr(shortened);
+  const shortened = await db
+    .prepare("SELECT * FROM urls WHERE short = ?")
+    .bind(name)
+    .first<ShortenedUrl>();
 
-  if (!parsed || parsed.owner != user.githubId) {
+  if (!shortened || shortened.owner != user.githubId) {
     return new Response("Not found", { status: 404 });
   }
 
-  const updated = { ...parsed, ...data };
-  await kv.put(name, JSON.stringify(updated));
+  const updated = { ...shortened, ...data };
+  await db
+    .prepare(
+      "UPDATE urls SET target = ?, expiration = ?, max_uses = ? WHERE short = ?",
+    )
+    .bind(updated.target, updated.expiration, updated.max_uses, name)
+    .run();
 
   return new Response(null, { status: 204 });
 };

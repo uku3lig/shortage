@@ -1,9 +1,7 @@
 /// <reference types="astro/client" />
 
-type KVNamespace = import("@cloudflare/workers-types").KVNamespace;
 type D1Database = import("@cloudflare/workers-types").D1Database;
 type ENV = {
-  SHORTAGE_NAMESPACE: KVNamespace;
   SHORTAGE_AUTH: D1Database;
 };
 
@@ -16,6 +14,7 @@ declare namespace App {
 }
 
 interface ShortenedUrl {
+  short: string;
   target: string;
   expiration?: string;
   max_uses?: number;
