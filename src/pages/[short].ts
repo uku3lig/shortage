@@ -1,5 +1,4 @@
 import type { APIRoute } from "astro";
-import { destr } from "destr";
 
 export const ALL: APIRoute = async ({ params, locals, redirect }) => {
   const db = locals.runtime.env.SHORTAGE_AUTH;
@@ -8,7 +7,12 @@ export const ALL: APIRoute = async ({ params, locals, redirect }) => {
     .bind(params.short)
     .first<ShortenedUrl>();
 
-  if (value) {
+  if (value && value.uses < (value.max_uses || +Infinity)) {
+    await db
+      .prepare("UPDATE urls SET uses = uses + 1 WHERE short = ?")
+      .bind(params.short)
+      .run();
+
     return redirect(value.target);
   } else {
     return new Response("Not found", { status: 404 });
